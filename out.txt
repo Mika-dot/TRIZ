@@ -1,0 +1,5 @@
+Пайплайн завершен.
+Каталог запуска: runs\run_20260306_120155
+Отчет: runs\run_20260306_120155\report.md
+JSON: runs\run_20260306_120155\results.json
+Краткое summary: runs\run_20260306_120155\summary.txt

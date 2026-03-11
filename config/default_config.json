@@ -1,0 +1,16 @@
+{
+  "base_url": "http://172.31.0.153:49572/v1",
+  "api_key": "lm-studio",
+  "default_model": "openai/gpt-oss-20b",
+  "fallback_models": [],
+  "stage_model_map": {},
+  "model_selection_strategy": "round_robin",
+  "use_structured_output": true,
+  "temperature": 0.2,
+  "max_tokens": 500,
+  "timeout_seconds": 90,
+  "retry_attempts": 1,
+  "max_context_chars": 6000,
+  "project_language": "ru",
+  "output_root": "runs"
+}
