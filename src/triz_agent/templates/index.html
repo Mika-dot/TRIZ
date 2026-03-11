@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero card">
+  <div>
+    <span class="eyebrow">Веб-интерфейс к полному ТРИЗ-пайплайну</span>
+    <h1>Запускайте анализ без командной строки</h1>
+    <p class="lead">Введите проблему, ограничения и дополнительный контекст. Приложение само запускает пайплайн, сохраняет результаты в <code>runs/</code> и показывает этапы, отчёт и итоговое решение.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><strong>{{ recent_runs|length }}</strong><span>последних запусков</span></div>
+    <div class="stat"><strong>{{ active_jobs|length }}</strong><span>активных задач</span></div>
+  </div>
+</section>
+
+<div class="grid two-cols">
+  <section class="card">
+    <h2>Новая задача</h2>
+    {% if form_error %}
+      <div class="alert alert-error">{{ form_error }}</div>
+    {% endif %}
+    <form method="post" action="{{ url_for('solve') }}" class="stack-lg">
+      <div>
+        <label for="problem">Описание проблемы</label>
+        <textarea id="problem" name="problem" rows="7" required>{{ form_data.problem }}</textarea>
+      </div>
+      <div>
+        <label for="constraints">Ограничения</label>
+        <textarea id="constraints" name="constraints" rows="5">{{ form_data.constraints }}</textarea>
+      </div>
+      <div>
+        <label for="context_notes">Дополнительный контекст</label>
+        <textarea id="context_notes" name="context_notes" rows="4">{{ form_data.context_notes }}</textarea>
+      </div>
+      <label class="checkbox-row">
+        <input type="checkbox" name="mock">
+        <span>Демо-режим без LM Studio</span>
+      </label>
+      <div class="actions">
+        <button class="button primary" type="submit">Запустить ТРИЗ-анализ</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="stack-lg">
+    <section class="card">
+      <h2>Активные задачи</h2>
+      {% if active_jobs %}
+        <div class="stack-md">
+          {% for job in active_jobs %}
+            <a class="job-row" href="{{ url_for('job_detail', job_id=job.id) }}">
+              <div>
+                <strong>{{ job.current_stage_id or 'Ожидание запуска' }}</strong>
+                <div class="muted">{{ job.current_stage_title or 'Подготовка пайплайна' }}</div>
+              </div>
+              <div class="align-right">
+                <div class="pill">{{ job.progress_percent }}%</div>
+                <div class="muted small">{{ job.stage_index }}/{{ job.total_stages }}</div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">Активных задач нет.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <div class="section-header">
+        <h2>Последние запуски</h2>
+      </div>
+      {% if recent_runs %}
+        <div class="stack-md">
+          {% for run in recent_runs %}
+            <a class="run-card" href="{{ url_for('run_detail', run_id=run.run_id) }}">
+              <div class="run-card-top">
+                <strong>{{ run.run_id }}</strong>
+                <span class="muted small">{{ run.created_at }}</span>
+              </div>
+              <div class="run-title">{{ run.final_solution or 'Итог ещё не сформирован' }}</div>
+              <p class="muted clamp-3">{{ run.executive_summary or run.summary }}</p>
+              <div class="chips">
+                <span class="pill">Этапов: {{ run.stats.stage_count }}</span>
+                <span class="pill">Средняя уверенность: {{ run.stats.avg_confidence }}</span>
+                {% if run.stats.warning_count %}<span class="pill warn">Проверить: {{ run.stats.warning_count }}</span>{% endif %}
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">История запусков пока пуста.</p>
+      {% endif %}
+    </section>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card stack-lg" id="job-root" data-job-id="{{ job.id }}">
+  <div class="section-header">
+    <div>
+      <span class="eyebrow">Запуск в процессе</span>
+      <h1>Задача {{ job.id }}</h1>
+      <p class="muted">Приложение выполняет этапы последовательно и сохраняет результаты в папку <code>runs/</code>.</p>
+    </div>
+    <a class="button ghost" href="{{ url_for('index') }}">Назад</a>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-meta">
+      <div>
+        <div class="muted small">Текущий этап</div>
+        <strong id="current-stage">{{ job.current_stage_id or 'Подготовка' }} {{ job.current_stage_title }}</strong>
+      </div>
+      <div class="align-right">
+        <div class="muted small">Прогресс</div>
+        <strong id="progress-text">{{ job.stage_index }}/{{ job.total_stages }}</strong>
+      </div>
+    </div>
+    <div class="progress-bar"><div id="progress-fill" style="width: {{ job.progress_percent }}%"></div></div>
+    <p class="muted" id="job-status-text">{{ 'Пайплайн выполняется…' if job.status in ['queued', 'running'] else job.status }}</p>
+  </div>
+
+  <div id="job-error" class="alert alert-error hidden"></div>
+  <div id="job-success" class="alert alert-success hidden"></div>
+
+  <section>
+    <h2>Промежуточные результаты</h2>
+    <div class="stack-md" id="stages-container">
+      {% for stage in job.results %}
+        <article class="stage-card {{ stage.status_hint }}">
+          <div class="stage-card-head">
+            <div>
+              <strong>{{ stage.stage_id }}. {{ stage.title }}</strong>
+              <div class="muted small">{{ stage.block }}</div>
+            </div>
+            <span class="pill {{ stage.confidence|confidence_badge }}">{{ '%.2f'|format(stage.confidence) }}</span>
+          </div>
+          <p>{{ stage.summary }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+<script src="{{ url_for('static', filename='js/job.js') }}"></script>
+{% endblock %}

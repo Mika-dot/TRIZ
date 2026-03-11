@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="stack-lg">
+  <section class="card hero-small">
+    <div class="section-header align-top">
+      <div>
+        <span class="eyebrow">Результат запуска</span>
+        <h1>{{ run.run_id }}</h1>
+        <p class="muted">{{ run.created_at }}</p>
+      </div>
+      <div class="actions wrap">
+        <a class="button ghost" href="{{ url_for('download_artifact', run_id=run.run_id, artifact_name='summary.txt') }}">Скачать summary.txt</a>
+        <a class="button ghost" href="{{ url_for('download_artifact', run_id=run.run_id, artifact_name='report.md') }}">Скачать report.md</a>
+        <a class="button ghost" href="{{ url_for('download_artifact', run_id=run.run_id, artifact_name='results.json') }}">Скачать results.json</a>
+      </div>
+    </div>
+    <div class="grid metrics-grid">
+      <div class="metric-card">
+        <span>Этапов</span>
+        <strong>{{ run.stats.stage_count }}</strong>
+      </div>
+      <div class="metric-card">
+        <span>Средняя уверенность</span>
+        <strong>{{ run.stats.avg_confidence }}</strong>
+      </div>
+      <div class="metric-card">
+        <span>Низкая уверенность</span>
+        <strong>{{ run.stats.low_conf_count }}</strong>
+      </div>
+      <div class="metric-card">
+        <span>Предупреждения</span>
+        <strong>{{ run.stats.warning_count }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="card accent-card">
+    <span class="eyebrow">Краткий вывод</span>
+    <h2>{{ run.final_solution }}</h2>
+    <p class="lead">{{ run.executive_summary or run.summary }}</p>
+  </section>
+
+  <div class="grid detail-grid">
+    <section class="card stack-md">
+      <h2>Входные данные</h2>
+      <div>
+        <div class="muted small">Проблема</div>
+        <p>{{ run.input.problem }}</p>
+      </div>
+      {% if run.input.constraints %}
+      <div>
+        <div class="muted small">Ограничения</div>
+        <p>{{ run.input.constraints }}</p>
+      </div>
+      {% endif %}
+      {% if run.input.context_notes %}
+      <div>
+        <div class="muted small">Контекст</div>
+        <p>{{ run.input.context_notes }}</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card stack-md">
+      <h2>Артефакты</h2>
+      <div class="stack-sm">
+        <a href="{{ url_for('download_artifact', run_id=run.run_id, artifact_name='summary.txt') }}">summary.txt</a>
+        <a href="{{ url_for('download_artifact', run_id=run.run_id, artifact_name='report.md') }}">report.md</a>
+        <a href="{{ url_for('download_artifact', run_id=run.run_id, artifact_name='results.json') }}">results.json</a>
+      </div>
+      <div>
+        <div class="muted small">Папка запуска</div>
+        <code>{{ run.run_dir }}</code>
+      </div>
+    </section>
+  </div>
+
+  {% for block in run.blocks %}
+    {% set block_is_first = loop.first %}
+    <section class="card stack-md">
+      <div class="section-header">
+        <h2>{{ block.name }}</h2>
+        <span class="pill">{{ block["items"]|length }} этапов</span>
+      </div>
+      <div class="stack-md">
+        {% for item in block["items"] %}
+          <details class="details-card" {% if loop.first and block_is_first %}open{% endif %}>
+            <summary>
+              <div>
+                <strong>{{ item.stage_id }}. {{ item.title }}</strong>
+                <div class="muted small">{{ item.model }}</div>
+              </div>
+              <div class="summary-right">
+                <span class="pill {{ item.confidence|confidence_badge }}">{{ '%.2f'|format(item.confidence) }}</span>
+                {% if item.status_hint == 'warning' %}<span class="pill warn">проверить</span>{% endif %}
+              </div>
+            </summary>
+            <div class="details-body stack-md">
+              <p>{{ item.summary }}</p>
+
+              <div>
+                <div class="muted small">Результаты этапа</div>
+                <div class="kv-grid">
+                  {% for key, value in item.deliverables.items() %}
+                    <div class="kv-row">
+                      <div class="kv-key">{{ key }}</div>
+                      <div class="kv-value">{{ value }}</div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              {% if item.quality_checks %}
+              <div>
+                <div class="muted small">Проверки качества</div>
+                <div class="stack-sm">
+                  {% for check in item.quality_checks %}
+                    <div class="quality-row">
+                      <span class="pill {{ 'good' if check.status in ['passed', 'pass', 'ok', 'OK', 'проверено', 'relevant'] else 'warn' }}">{{ check.status }}</span>
+                      <div>
+                        <strong>{{ check.check }}</strong>
+                        {% if check.comment %}<div class="muted small">{{ check.comment }}</div>{% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if item.handoff %}
+                <div>
+                  <div class="muted small">Передача на следующий этап</div>
+                  <p>{{ item.handoff }}</p>
+                </div>
+              {% endif %}
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+</section>
+{% endblock %}

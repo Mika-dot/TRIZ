@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="{{ url_for('index') }}">TRIZ Agent Studio</a>
+      <nav class="topnav">
+        <a href="{{ url_for('index') }}">Новый запуск</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container page">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

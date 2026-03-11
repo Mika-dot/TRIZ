@@ -1,0 +1,3 @@
+[console_scripts]
+triz-agent = triz_agent.cli:main
+triz-agent-web = triz_agent.webapp:main
