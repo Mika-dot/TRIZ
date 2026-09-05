@@ -5,6 +5,7 @@
   "fallback_models": [],
   "stage_model_map": {},
   "model_selection_strategy": "round_robin",
+  "pipeline_profile": "slm_full",
   "use_structured_output": true,
   "temperature": 0.2,
   "max_tokens": 500,
@@ -12,5 +13,8 @@
   "retry_attempts": 1,
   "max_context_chars": 6000,
   "project_language": "ru",
-  "output_root": "runs"
+  "output_root": "runs",
+  "runtime_guard_enabled": false,
+  "runtime_guard_max_gpu_temp_c": null,
+  "runtime_guard_max_vram_pct": null
 }
