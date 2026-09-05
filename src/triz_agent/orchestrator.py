@@ -8,7 +8,8 @@ from triz_agent.config import AppConfig
 from triz_agent.models import PipelineInput, RunArtifacts, StageResult
 from triz_agent.prompt_builder import SYSTEM_PROMPT, build_user_prompt
 from triz_agent.reporting import ensure_run_dir, save_run_artifacts, save_stage_log
-from triz_agent.stage_catalog import STAGES
+from triz_agent.runtime_guard import enforce_runtime_guard
+from triz_agent.stage_catalog_extended import get_stages
 
 
 class LLMClientProtocol(Protocol):
@@ -39,9 +40,16 @@ class TrizOrchestrator:
         output_base = output_root or self.config.output_root
         run_dir = ensure_run_dir(output_base)
         results: List[StageResult] = []
-        total_stages = len(STAGES)
+        stages = get_stages(self.config.pipeline_profile)
+        total_stages = len(stages)
 
-        for index, stage in enumerate(STAGES):
+        for index, stage in enumerate(stages):
+            if self.config.runtime_guard_enabled:
+                enforce_runtime_guard(
+                    max_gpu_temp_c=self.config.runtime_guard_max_gpu_temp_c,
+                    max_vram_pct=self.config.runtime_guard_max_vram_pct,
+                )
+
             model = self.config.pick_model(stage.id, index)
             user_prompt = build_user_prompt(
                 stage=stage,
@@ -56,9 +64,18 @@ class TrizOrchestrator:
                 user_prompt=user_prompt,
             )
             results.append(result)
-            save_stage_log(run_dir=Path(run_dir), result=result, request_payload=request_payload, raw_content=raw_content)
+            save_stage_log(
+                run_dir=Path(run_dir),
+                result=result,
+                request_payload=request_payload,
+                raw_content=raw_content,
+            )
             if progress_callback:
                 progress_callback(index + 1, total_stages, stage, result, str(run_dir))
 
-        artifacts = save_run_artifacts(run_dir=Path(run_dir), pipeline_input=pipeline_input, results=results)
+        artifacts = save_run_artifacts(
+            run_dir=Path(run_dir),
+            pipeline_input=pipeline_input,
+            results=results,
+        )
         return OrchestrationOutput(results=results, artifacts=artifacts)
