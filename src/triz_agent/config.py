@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -14,6 +14,7 @@ class AppConfig:
     fallback_models: List[str] = field(default_factory=list)
     stage_model_map: Dict[str, str] = field(default_factory=dict)
     model_selection_strategy: str = 'round_robin'
+    pipeline_profile: str = 'slm_full'
     use_structured_output: bool = True
     temperature: float = 0.2
     max_tokens: int = 1400
@@ -22,6 +23,9 @@ class AppConfig:
     max_context_chars: int = 22000
     project_language: str = 'ru'
     output_root: str = 'runs'
+    runtime_guard_enabled: bool = False
+    runtime_guard_max_gpu_temp_c: Optional[float] = None
+    runtime_guard_max_vram_pct: Optional[float] = None
 
     @classmethod
     def from_file(cls, path: str | Path) -> 'AppConfig':
@@ -36,6 +40,7 @@ class AppConfig:
             'fallback_models': self.fallback_models,
             'stage_model_map': self.stage_model_map,
             'model_selection_strategy': self.model_selection_strategy,
+            'pipeline_profile': self.pipeline_profile,
             'use_structured_output': self.use_structured_output,
             'temperature': self.temperature,
             'max_tokens': self.max_tokens,
@@ -44,6 +49,9 @@ class AppConfig:
             'max_context_chars': self.max_context_chars,
             'project_language': self.project_language,
             'output_root': self.output_root,
+            'runtime_guard_enabled': self.runtime_guard_enabled,
+            'runtime_guard_max_gpu_temp_c': self.runtime_guard_max_gpu_temp_c,
+            'runtime_guard_max_vram_pct': self.runtime_guard_max_vram_pct,
         }
 
     def save(self, path: str | Path) -> None:
