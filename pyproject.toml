@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "triz-llm-agent"
-version = "1.0.0"
-description = "Full TRIZ/ARIZ pipeline with stateless LM Studio calls on every step"
+version = "1.1.0"
+description = "TRIZ/FSA/ARIZ pipeline for engineering and small-language-model architecture optimization"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
