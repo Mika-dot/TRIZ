@@ -14,7 +14,7 @@ class AppConfig:
     fallback_models: List[str] = field(default_factory=list)
     stage_model_map: Dict[str, str] = field(default_factory=dict)
     model_selection_strategy: str = 'round_robin'
-    pipeline_profile: str = 'slm_full'
+    pipeline_profile: str = 'core'
     use_structured_output: bool = True
     temperature: float = 0.2
     max_tokens: int = 1400
